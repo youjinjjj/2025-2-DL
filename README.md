@@ -1,18 +1,19 @@
-# Transfusion Reproduction 
-**“Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model”**의 핵심 아키텍처를 재현.
+# Transfusion Reproduction
+Reproduction of the core architecture of  
+**“Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model.”**
 
 ---
 
-## 1. 연구 개요 
+## 1. Overview
 
-Transfusion은 텍스트(이산형)와 이미지(연속형)를 **단일 Transformer 모델** 내에서 동시에 처리하는 새로운 방법론을 제안.
-텍스트는 *Next Token Prediction*, 이미지는 *Diffusion* 손실 함수로 학습하는 것이 이 논문의 제안임.
+Transfusion proposes a new method for handling **text (discrete)** and **images (continuous)** **within a single Transformer model**.  
+Text is trained with *next-token prediction*, while images are trained with a *diffusion* loss; this joint objective is the key idea of the paper.
 
-본 연구의 목표는 원 논문의 대규모 학습(7B 파라미터, 2T 토큰)을 그대로 복제하는 것이 어려웠으므로, 
+Since faithfully reproducing the original large-scale setting (7B parameters, 2T tokens) is infeasible in this project, the goal here is to:
 
-- **경량화된 환경**(1.1B 모델, MS-COCO Subset)에서  
-- 해당 아키텍처의 손실 함수가 **수학적으로 유효하게 수렴하는지 검증**하고,
-- 데이터 규모에 따른 멀티모달 생성 모델의 **한계점(Scaling Limits)**을 실험적으로 규명했음.
+- verify, in a **lightweight setting** (1.1B model, MS-COCO subset),  
+- whether the joint loss formulation **converges in a numerically stable way**, and  
+- empirically explore the **scaling limits** of the multi-modal generative model with respect to data size.
 
 ---
 
@@ -20,63 +21,61 @@ Transfusion은 텍스트(이산형)와 이미지(연속형)를 **단일 Transfor
 
 ### 2.1 Model Architecture
 
-논문의 *Unified Multi-Modal Model* 개념을 유지, 리소스 제약을 고려하여 다음과 같이 구성.
+We keep the paper’s *Unified Multi-Modal Model* idea, while adapting it to our resource constraints:
 
-- **Backbone**: TinyLlama-1.1B (Language Model)  
-- **Image Encoder / Decoder**: Stable Diffusion VAE (Pre-trained)  
-- **Attention Mechanism**
-  - Text Tokens: Causal Attention (Autoregressive)
-  - Image Patches: Intra-image Bidirectional Attention  
-- **Loss Function**
+- **Backbone**: TinyLlama-1.1B (language model)  
+- **Image encoder / decoder**: Stable Diffusion VAE (pre-trained)  
+- **Attention mechanism**
+  - Text tokens: causal (autoregressive) attention  
+  - Image patches: intra-image bidirectional attention  
+- **Loss function**
 
   \[
   \mathcal{L}_{\text{Total}} = \mathcal{L}_{\text{LM}} + \lambda \cdot \mathcal{L}_{\text{Diffusion}}
   \]
-> 이때 멀티모달 모델의 핵심 로직(텍스트/이미지 토큰을 하나의 시퀀스로 처리하고,  
-> LM loss + Diffusion-style loss를 함께 최적화하는 부분)은  
-> `transfusion_pytorch`의 `Transfusion` 클래스를 그대로 사용합니다.
+
+> The core multi-modal logic—treating text and image tokens as a single sequence and jointly optimizing  
+> LM loss + diffusion-style loss—is used **as-is** from the `Transfusion` class in `transfusion_pytorch`.
 
 ### 2.2 Experimental Setup
 
-- **Dataset**: MS-COCO 2017 Train Subset (Image–Caption Pairs)  
-- **Hardware**: Single NVIDIA GPU (RTX 3090, 24GB VRAM)
+- **Dataset**: MS-COCO 2017 train subset (image–caption pairs)  
+- **Hardware**: single NVIDIA GPU (RTX 3090, 24GB VRAM)
 
-**Training Configuration**
+**Training configuration**
 
 - Optimizer: AdamW (LR = 1e-4)  
-- Batch Size: 4  
-- Total Steps: 5,000  
-  → 약 20,000 샘플 학습
+- Batch size: 4  
+- Total steps: 5,000  
+  → roughly 20,000 samples seen during training
 
 ---
 
-## 3. 구현 내용 (Implementation Details)
+## 3. Implementation Details
 
-본 구현은 오픈소스 **lucidrains/transfusion-pytorch**를 베이스로 하되,  
-**MS-COCO 데이터셋 파이프라인 구축 및 학습 안정화**를 위해 학습 스크립트를 수정하여 사용.
+This implementation is based on the open-source repository **`lucidrains/transfusion-pytorch`**,  
+but the training script is modified for **MS-COCO data loading** and **stable training**.
 
-- `transfusion_pytorch/` 내의 **`Transfusion` 모델 구현과 loss 정의는 원 저장소 코드를 그대로 사용**.
-- 이 위에 COCO + TinyLlama + SD-VAE 환경을 올리기 위해 **다음 스크립트를 새로 구성**하여 사용함.
+- Inside `transfusion_pytorch/`, the **`Transfusion` model implementation and loss definition** are used **without changes**.  
+- On top of that, we newly implement scripts that build a full pipeline combining **COCO + TinyLlama + SD-VAE**.
 
-
-### 파일 구조 (File Structure)
+### File Structure
 
 ```text
-├── train_coco_subset.py          # 메인 학습 스크립트 
-├── eval_coco_val.py              # Loss 검증 및 평가 스크립트
-├── inference.py                  # 텍스트-투-이미지 생성 및 디버깅 스크립트
-├── transfusion_pytorch/          # Transfusion Core
-└── results_coco_single/          # 학습 로그, 체크포인트
+├── train_coco_subset.py          # main training script
+├── eval_coco_val.py              # evaluation script (train/val loss)
+├── inference.py                  # text-to-image generation & debugging
+├── transfusion_pytorch/          # Transfusion core implementation
+└── results_coco_single/          # training logs & checkpoints
 ```
----
 
-## 4. 실행 방법 
+## 4. How to Run 
 
-1) 환경 설정
+1) Environment Setup
 ```
 pip install torch torchvision transformers diffusers accelerate vector-quantize-pytorch
 ```
-2) 모델 학습 (Training)
+2) Training
 ```
 python train_coco_subset.py \
   --coco-root ./data/coco \
@@ -86,25 +85,28 @@ python train_coco_subset.py \
   --max-steps 5000 \
   --results-dir ./results_coco_single
 ```
-3) 추롬 및 테스트 (Inference)
+3) Inference / Testing
 ```
 python inference.py
 ```
 ## 5. Experimental Results
-4.1 Quantitative Analysis
+###5.1 Quantitative Analysis
 
-5,000 Step의 학습 과정에서 Total Loss는 1.01에서 0.37로 안정적으로 감소
-이는 서로 다른 성격의 두 모달리티(텍스트, 이미지)가 단일 Transformer 내에서 충돌 없이 동시에 최적화될 수 있다는
-Transfusion 방법론의 수학적 타당성 검증됨
+During 5,000 training steps, the total loss decreased from 1.01 to 0.37 in a stable manner.
+This suggests that two very different modalities (text and images) can be jointly optimized in a single Transformer
+without the objectives collapsing into each other, supporting the core idea of Transfusion.
 
-Figure 1: 5,000 Step 동안의 학습 손실 곡선.
-지속적인 우하향 추세를 보이며 모델이 데이터 패턴을 학습하고 있음을 나타냄.
+###5.2 Qualitative Analysis
 
-4.2 Qualitative Analysis
+For qualitative evaluation, we attempted text-to-image generation.
+However, after receiving a text prompt, the model:
+-correctly produced the special <BOI> token, but
+-failed to transition into the image generation phase (diffusion latent sampling), and
+-kept generating only text tokens.
 
-학습된 모델로 텍스트 기반 이미지 생성을 시도하였으나,
-모델은 텍스트 프롬프트 입력 후 이미지 생성 모드(Diffusion Latent Generation)로 진입하지 못하고
-**텍스트 토큰만을 지속적으로 생성하는 현상(Mode Collapse)**이 관찰.
+This behavior corresponds to a mode collapse in modality space:
+despite the numerically converged joint loss, the model behaves like a pure language model
+and does not utilize the image branch at inference time.
 
 
 ## 6. References
