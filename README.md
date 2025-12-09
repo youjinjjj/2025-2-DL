@@ -90,17 +90,17 @@ python train_coco_subset.py \
 python inference.py
 ```
 ## 5. Experimental Results
-###5.1 Quantitative Analysis
+### 5.1 Quantitative Analysis
 
 During 5,000 training steps, the total loss decreased from 1.01 to 0.37 in a stable manner.
 This suggests that two very different modalities (text and images) can be jointly optimized in a single Transformer
 without the objectives collapsing into each other, supporting the core idea of Transfusion.
 
-###5.2 Qualitative Analysis
+### 5.2 Qualitative Analysis
 
 For qualitative evaluation, we attempted text-to-image generation.
 However, after receiving a text prompt, the model:
--correctly produced the special <BOI> token, but
+-correctly produced the special ```<BOI>``` token, but
 -failed to transition into the image generation phase (diffusion latent sampling), and
 -kept generating only text tokens.
 
