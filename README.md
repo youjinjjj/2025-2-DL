@@ -107,4 +107,5 @@ Figure 2: 추론 로그.
 
 ## 6. References
 >[1] Zhou et al., "Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model", ICLR 2025.
+
 >[2] Lucidrains, Transfusion-pytorch Repository. https://github.com/lucidrains/transfusion-pytorch?tab=readme-ov-file 
