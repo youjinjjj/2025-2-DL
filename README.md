@@ -1,6 +1,5 @@
 # Transfusion Reproduction 
-**“Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model”**의 핵심 아키텍처를 재현하고,  
- **학습 역학(Training Dynamics)**을 분석한 프로젝트입니다.
+**“Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model”**의 핵심 아키텍처를 재현.
 
 ---
 
@@ -9,9 +8,9 @@
 Transfusion은 텍스트(이산형)와 이미지(연속형)를 **단일 Transformer 모델** 내에서 동시에 처리하는 새로운 방법론을 제안.
 텍스트는 *Next Token Prediction*, 이미지는 *Diffusion* 손실 함수로 학습하는 것이 특징입니다.
 
-본 연구의 목표는 원 논문의 대규모 학습(7B 파라미터, 2T 토큰)을 그대로 복제하는 것이 아니라,
+본 연구의 목표는 원 논문의 대규모 학습(7B 파라미터, 2T 토큰)을 그대로 복제하는 것이 어려웠으므로, 
 
-- **경량화된 환경**(1.1B 모델, MS-COCO Subset)에서도  
+- **경량화된 환경**(1.1B 모델, MS-COCO Subset)에서  
 - 해당 아키텍처의 손실 함수가 **수학적으로 유효하게 수렴하는지 검증**하고,
 - 데이터 규모에 따른 멀티모달 생성 모델의 **한계점(Scaling Limits)**을 실험적으로 규명했음.
 
@@ -33,6 +32,9 @@ Transfusion은 텍스트(이산형)와 이미지(연속형)를 **단일 Transfor
   \[
   \mathcal{L}_{\text{Total}} = \mathcal{L}_{\text{LM}} + \lambda \cdot \mathcal{L}_{\text{Diffusion}}
   \]
+> 이때 멀티모달 모델의 핵심 로직(텍스트/이미지 토큰을 하나의 시퀀스로 처리하고,  
+> LM loss + Diffusion-style loss를 함께 최적화하는 부분)은  
+> `transfusion_pytorch`의 `Transfusion` 클래스를 그대로 사용합니다.
 
 ### 2.2 Experimental Setup
 
@@ -50,8 +52,12 @@ Transfusion은 텍스트(이산형)와 이미지(연속형)를 **단일 Transfor
 
 ## 3. 구현 내용 (Implementation Details)
 
-본 구현은 오픈소스 [lucidrains/transfusion-pytorch](https://github.com/lucidrains/transfusion-pytorch)를 베이스로 하되,  
-**MS-COCO 데이터셋 파이프라인 구축** 및 **학습 안정화**를 위해 코드를 수정하여 진행
+본 구현은 오픈소스 **lucidrains/transfusion-pytorch**를 베이스로 하되,  
+**MS-COCO 데이터셋 파이프라인 구축 및 학습 안정화**를 위해 학습 스크립트를 수정하여 사용.
+
+- `transfusion_pytorch/` 내의 **`Transfusion` 모델 구현과 loss 정의는 원 저장소 코드를 그대로 사용**.
+- 이 위에 COCO + TinyLlama + SD-VAE 환경을 올리기 위해 **다음 스크립트를 새로 구성**하여 사용함.
+
 
 ### 파일 구조 (File Structure)
 
