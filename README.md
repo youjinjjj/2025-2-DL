@@ -1,90 +1,66 @@
 # Transfusion Reproduction (ICLR 2025)
 
-## 1. Project Overview
+## 1. 프로젝트 개요
 
-- **Paper**: *TRANSFUSION: Predict the Next Token and Diffuse Images with One Multi-Modal Model* (ICLR 2025)
-- **Goal**:  
-  - 하나의 Transformer가 텍스트는 **다음 토큰 예측**, 이미지는 **diffusion 노이즈 예측** 두 개의 목적함수로 동시에 학습될 수 있다는 Transfusion의 핵심 아이디어를,  
-    **MS-COCO 텍스트-이미지 실험** 수준에서 재현한다.
-  - 논문에서 주장하는 “하나의 모델로 텍스트와 이미지를 함께 생성할 수 있다”는 부분을,  
-    **소규모 설정 + 공개 PyTorch 구현**으로 검증한다.
-
-- **This repo**
-  - `/transfusion-repro/` 폴더에 재현용 코드와 로그를 모아두었다.
-  - 원본 구현이 아닌, 공개 PyTorch 구현(`lucidrains/transfusion-pytorch`)을 기반으로 재현을 진행하였다.
-
----
-
-## 2. Original Paper Summary
-
-### 2.1 Core Idea
-
-- 텍스트는 **언어모델(Next-Token Prediction)**, 이미지는 **Diffusion (노이즈 예측 MSE)** 로 학습하면서도,
-- 두 modality를 **하나의 Transformer**에 올려서 함께 학습하는 방법을 제안.
-- 이미지 패치는 bidirectional attention, 텍스트 토큰은 causal attention 을 쓰고,  
-  하나의 시퀀스 안에서 BOI/EOI 토큰으로 이미지 구간을 감싼 뒤 함께 처리한다.
-- 텍스트-텍스트, 텍스트-이미지, 이미지-텍스트를 모두 다루는 **진짜 multi-modal generation**을 목표로 한다.
-
-### 2.2 Main Contributions (논문 기준)
-
-1. **통합 아키텍처**  
-   - 텍스트와 이미지를 모두 처리하는 단일 Transformer + modality-specific encoder/decoder.
-2. **Scaling Law 분석**  
-   - 같은 데이터/연산량 조건에서, 이미지 토큰 양자화(Chameleon-style)보다 Transfusion이  
-     텍스트/이미지/캡셔닝 모두에서 더 좋은 scaling 을 보인다고 보고.
-3. **Ablation**  
-   - intra-image bidirectional attention, patch size, U-Net encoder/decoder의 역할 분석.
-4. **7B 모델 결과**  
-   - 7B Transfusion + 2T multi-modal tokens 학습 시,  
-     기존 diffusion/언어모델들과 비슷한 수준의 이미지·텍스트 성능을 달성.
-
----
-
-## 3. Reproduction Scope & Differences
-
-### 3.1 What We Reproduced
-
-- **Task 포커스**:  
-  - 전체 multi-modal 세팅이 아닌, **MS-COCO 텍스트 → 이미지 생성** 실험을 소규모로 재현.
-- **모델**
-  - 공개 PyTorch 구현에서 제공하는 **단일-스케일 Transfusion**(소형 모델)을 사용.
-  - 텍스트 + 이미지 패치가 하나의 시퀀스로 들어가고,  
-    텍스트에는 causal attention, 이미지 패치에는 intra-image bidirectional attention 을 사용.
-- **데이터**
-  - MS-COCO 이미지-캡션 쌍 사용.
-  - 과제/리소스 제약 상, **논문 전체 데이터(0.5T/2T tokens)** 가 아닌  
-    PyTorch 구현에서 제공하는 **COCO subset 설정**을 사용.
+- **논문**: *TRANSFUSION: Predict the Next Token and Diffuse Images with One Multi-Modal Model* (ICLR 2025)
 - **목표**
-  - 학습 스크립트가 정상적으로 동작하는지 확인.
-  - 학습/검증 loss를 기록하고, 샘플 이미지를 생성해 논문에서 주장하는 특성이  
-    **질적으로는** 재현되는지 확인.
-
-### 3.2 What We Did *Not* Reproduce (중요한 차이)
-
-- 7B 모델 + 2T 토큰 전체 학습은 **리소스 부족으로 수행하지 않음**.
-- Chameleon-style discrete baseline 을 직접 구현하거나 비교하지 않음.
-- VAE / U-Net encoder–decoder 를 논문과 동일한 설정으로 다시 학습하지 않고,  
-  **공개 구현의 사전학습 VAE/모델**을 그대로 사용.
-- 논문에서 보고하는 FID, CLIP, CIDEr, GenEval 등 **정량 지표는 측정하지 못함**  
-  (시간·GPU 제약 / COCO val 전체 사용 X).
-- multi-modal text generation (텍스트-only, 이미지→텍스트 캡셔닝, 이미지 편집) 실험은 범위 밖.
-
-이 README와 보고서는, 위와 같은 **스코프 제한**을 전제로 읽어야 한다.
+  - 하나의 Transformer가 **텍스트는 다음 토큰 예측**, **이미지는 diffusion 노이즈 예측**으로 동시에 학습되는 Transfusion 구조를,
+  - MS-COCO 텍스트–이미지 실험 수준에서 **소규모로 재현**하고 동작을 확인한다.
+- **원본 코드**
+  - 공식 구현이 아닌, 공개 PyTorch 구현인 [`lucidrains/transfusion-pytorch`](https://github.com/lucidrains/transfusion-pytorch)를 기반으로 재현을 수행하였다.
 
 ---
 
-## 4. Environment & Code Structure
+## 2. 재현 스코프 및 차이점
 
-### 4.1 Environment
+### 2.1 이번 재현에서 한 것
 
-- OS / Docker: (예: Ubuntu 20.04 + NVIDIA Docker)
-- Python: 3.x
-- PyTorch: 2.x (CUDA 11.x)
-- GPU: (예: A100 1장 / 2080Ti 1장 – 실제 사용한 GPU 명시)
+- **Task**: COCO 기반 **텍스트 → 이미지 생성** 부분만 다룸
+- **모델**
+  - Transfusion PyTorch 구현의 single-scale 모델 사용
+  - 텍스트와 이미지 패치를 하나의 시퀀스로 넣고,
+    - 텍스트: causal attention (next-token prediction)
+    - 이미지 패치: intra-image bidirectional attention + diffusion loss
+- **데이터**
+  - MS-COCO 2017 이미지–캡션 쌍 사용
+  - 전체 데이터가 아닌, GPU/시간 제약에 맞춘 **subset + 제한된 스텝(예: 5,000 step)** 학습
+- **검증**
+  - 학습 로그(loss)를 저장하고,
+  - 학습된 모델로 텍스트 프롬프트에 대한 이미지를 생성하여 **질적으로** 확인
 
-필요 패키지는 `requirements.txt` 또는 아래 명령으로 설치:
+### 2.2 논문과의 주요 차이
 
-```bash
-pip install -r requirements.txt
-# or
-pip install torch torchvision tqdm einops accelerate pillow
+- 7B 모델 + 2T 토큰 large-scale 학습은 수행하지 않음
+- Chameleon-style discrete 토큰 baseline은 구현하지 않음
+- FID, CLIP, CIDEr 등 **정량 지표는 계산하지 못함**
+- 이미지→텍스트, multi-modal text generation 등 **다른 task**는 범위 밖
+
+이번 레포는 “논문 전체 결과” 재현이 아니라,  
+**Transfusion 구조가 소규모 COCO 설정에서 실제로 동작하는지 확인하는 부분 재현**임을 전제로 한다.
+
+---
+
+## 3. 환경 및 디렉터리 구조
+
+### 3.1 Environment
+
+- Python 3.x
+- PyTorch 2.x + CUDA 11.x
+- 주요 라이브러리
+  - `torch`, `torchvision`, `accelerate`, `diffusers`, `transformers`, `tqdm` 등
+
+(실제 사용한 GPU/OS는 여기서 간단히 적어주면 좋음)
+
+### 3.2 Directory
+
+```text
+2025-2-DL/
+ ├─ transfusion-repro/
+ │   ├─ train_coco_subset.py         # COCO subset 학습
+ │   ├─ eval_coco_val.py            # train/val loss 평가 및 로그 저장
+ │   ├─ inference.py                # 학습된 모델로 이미지 생성
+ │   ├─ transfusion_pytorch/        # Transfusion PyTorch 구현
+ │   └─ results_coco_single/
+ │       ├─ train_loss_steps_5000.txt  # step별 train loss
+ │       └─ val_loss_train.txt         # 평균 loss 요약
+ └─ ...
