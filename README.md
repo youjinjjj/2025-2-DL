@@ -1,4 +1,4 @@
-# Transfusion Reproduction (ICLR 2025)
+# Transfusion Reproduction 
 **“Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model”**의 핵심 아키텍처를 재현하고,  
  **학습 역학(Training Dynamics)**을 분석한 프로젝트입니다.
 
