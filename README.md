@@ -106,5 +106,5 @@ Figure 2: 추론 로그.
 모델이 이미지 텐서 대신 텍스트 토큰만 생성하고 있음을 보여줌.
 
 ## 6. References
->>[1] Zhou et al., "Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model", ICLR 2025.
->>[2] Lucidrains, Transfusion-pytorch Repository. https://github.com/lucidrains/transfusion-pytorch?tab=readme-ov-file 
+>[1] Zhou et al., "Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model", ICLR 2025.
+>[2] Lucidrains, Transfusion-pytorch Repository. https://github.com/lucidrains/transfusion-pytorch?tab=readme-ov-file 
