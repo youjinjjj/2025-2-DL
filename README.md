@@ -6,7 +6,7 @@
 ## 1. 연구 개요 
 
 Transfusion은 텍스트(이산형)와 이미지(연속형)를 **단일 Transformer 모델** 내에서 동시에 처리하는 새로운 방법론을 제안.
-텍스트는 *Next Token Prediction*, 이미지는 *Diffusion* 손실 함수로 학습하는 것이 특징입니다.
+텍스트는 *Next Token Prediction*, 이미지는 *Diffusion* 손실 함수로 학습하는 것이 이 논문의 제안임.
 
 본 연구의 목표는 원 논문의 대규모 학습(7B 파라미터, 2T 토큰)을 그대로 복제하는 것이 어려웠으므로, 
 
