@@ -78,7 +78,7 @@ transfusion-repro/
 
 ## 4. How to Run 
 
-###4.1 Environment Setup
+### 4.1 Environment Setup
 ```
 pip install torch torchvision transformers diffusers accelerate vector-quantize-pytorch
 ```
@@ -120,7 +120,9 @@ The script prints detailed information about the returned objects from ```model.
 
 ## 5. Experimental Results
 
-
+We trained two COCO setups (λ = 1 and λ = 5) for about one epoch each, and in both cases the total loss decreased stably from roughly 1.0 to 0.3.
+However, at inference time both models only generated text: they produced the <BOI> token correctly but never entered the image latent sampling phase, even when the λ = 1 model was extended to 30,000 steps.
+Overall, the joint loss converged numerically, but in this low-resource regime the model failed to learn reliable text → image modality switching and effectively behaved like a pure language model.
 
 ## 6. References
 >[1] Zhou et al., "Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model", ICLR 2025.
