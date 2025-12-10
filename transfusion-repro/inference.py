@@ -1,16 +1,21 @@
+import argparse
 import torch
-from torch import nn
-from torchvision.utils import save_image
-from diffusers.models import AutoencoderKL
 from transformers import AutoTokenizer
+from diffusers.models import AutoencoderKL
+from torch import nn
 from transfusion_pytorch import Transfusion
+from torchvision.utils import save_image
 import os
 
-# ==========================================
-# 1. 클래스 정의 (학습 코드와 동일해야 함)
-# ==========================================
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ckpt", type=str, required=True, help="Path to model checkpoint (.pt)")
+    return parser.parse_args()
+
+
 class Encoder(nn.Module):
-    def __init__(self, vae: AutoencoderKL):
+    def __init__(self, vae):
         super().__init__()
         self.vae = vae
     def forward(self, image):
@@ -19,7 +24,7 @@ class Encoder(nn.Module):
         return 0.18215 * latent
 
 class Decoder(nn.Module):
-    def __init__(self, vae: AutoencoderKL):
+    def __init__(self, vae):
         super().__init__()
         self.vae = vae
     def forward(self, latents):
@@ -29,38 +34,18 @@ class Decoder(nn.Module):
         return (image / 2 + 0.5).clamp(0, 1)
 
 def main():
-    # 설정
-    MODEL_PATH = "./results_coco_single/model_step_5000.pt"
-    SAVE_DIR = "./generated_results"
+    args = parse_args()
     
-    # 프롬프트: 모델이 이미지를 그리도록 유도하는 짧고 명확한 문장
-    prompts = [
-        "A cute cat",
-        "A pizza",
-        "A sunset",
-        "A dog with ball"
-    ]
-
-    os.makedirs(SAVE_DIR, exist_ok=True)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # ==========================================
-    # 2. 모델 로드
-    # ==========================================
-    print("Loading VAE and Tokenizer...")
+    print("Initializing model...")
     tokenizer = AutoTokenizer.from_pretrained("TinyLlama/TinyLlama-1.1B-Chat-v1.0")
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-        
-    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse")
-    vae.requires_grad_(False)
-    vae.eval()
+    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").to(device)
     
     encoder = Encoder(vae)
     decoder = Decoder(vae)
 
-    print("Building Transfusion Model...")
     model = Transfusion(
         num_text_tokens = tokenizer.vocab_size,
         dim_latent = 4,
@@ -75,67 +60,47 @@ def main():
         add_pos_emb = False,
         modality_num_dim = 2,
         fallback_to_default_shape_if_invalid = True,
-        transformer = dict(
-            dim = 768,
-            depth = 12,
-            dim_head = 64,
-            heads = 12,
-        )
-    )
+        transformer = dict(dim=768, depth=12, dim_head=64, heads=12)
+    ).to(device)
 
-    # 가중치 로드
-    print(f"Loading weights from {MODEL_PATH}...")
-    try:
-        state_dict = torch.load(MODEL_PATH, map_location='cpu')
-        model.load_state_dict(state_dict)
-        print("Model weights loaded successfully!")
-    except Exception as e:
-        print(f"Error loading weights: {e}")
+
+    if not os.path.exists(args.ckpt):
+        print(f"Error: Checkpoint not found at {args.ckpt}")
         return
 
-    model.to(device)
+    print(f"Loading weights from {args.ckpt} ...")
+    state_dict = torch.load(args.ckpt, map_location=device)
+    model.load_state_dict(state_dict)
     model.eval()
 
-    # ==========================================
-    # 3. 이미지 생성 및 정밀 분석
-    # ==========================================
-    print("Starting generation...")
+    prompt = "A cute cat"
+    print(f"Original Prompt: '{prompt}'")
     
-    for i, prompt in enumerate(prompts):
-        print(f"\n[{i+1}/{len(prompts)}] Generating for prompt: '{prompt}'")
-        
-        text_enc = tokenizer(prompt, return_tensors='pt', add_special_tokens=True)
-        text_tokens = text_enc['input_ids'].to(device)
-        
-        with torch.no_grad():
-            # max_length를 줄여서 빠르게 확인 (256 토큰 정도만 생성)
-            output = model.sample(text_tokens, max_length=256)
 
-        found_image = False
-        print(f"Output type: {type(output)}")
-        
-        # 출력 결과 분석
-        if isinstance(output, list) or isinstance(output, tuple):
-            print(f"Output list length: {len(output)}")
-            for idx, item in enumerate(output):
-                if isinstance(item, torch.Tensor):
-                    print(f"  Item {idx} shape: {item.shape}")
-                    # 차원이 3(CHW) 또는 4(BCHW)면 이미지로 저장
-                    if item.ndim == 3 or item.ndim == 4:
-                        save_path = f"{SAVE_DIR}/result_{i}_{idx}.png"
-                        save_image(item, save_path)
-                        print(f"  -> Saved image to {save_path}")
-                        found_image = True
-                else:
-                    print(f"  Item {idx} type: {type(item)}")
-        else:
-            print(f"Output is not a list. It is: {output}")
+    text_ids = tokenizer(prompt, return_tensors='pt')['input_ids'].to(device)
 
-        if not found_image:
-            print("  Warning: No image tensor found in this output.")
-            print("  (Explanation: The model might have generated only text tokens.)")
 
-    print("\nDone!")
+    boi_id = model.som_ids[0] 
+    boi_tensor = torch.tensor([[boi_id]], device=device)
+
+
+    forced_input = torch.cat([text_ids, boi_tensor], dim=1)
+
+    print(f"Force prompting with <BOI> token injection...")
+
+    with torch.no_grad():
+        output = model.sample(prompt=forced_input, max_length=1200)
+
+    cnt = 0
+    for item in output:
+        if isinstance(item, torch.Tensor) and item.ndim == 4:
+            save_name = f"success_force_{cnt}.png"
+            save_image(item, save_name)
+            print(f"★ SUCCESS: Image Generated! Saved to {save_name}")
+            cnt += 1
+
+    if cnt == 0:
+        print("Result: No image generated. (Model might need more training steps)")
 
 if __name__ == "__main__":
     main()
