@@ -37,6 +37,11 @@ We keep the paper’s *Unified Multi-Modal Model* idea, while adapting it to our
 > The core multi-modal logic—treating text and image tokens as a single sequence and jointly optimizing  
 > LM loss + diffusion-style loss—is used **as-is** from the `Transfusion` class in `transfusion_pytorch`.
 
+We experiment with **two configurations of the loss weight λ**:
+
+- `sub_1.py`: baseline setting with a smaller image loss weight (λ ≈ 1.0)  
+- `main.py`: image-focused setting with a larger image loss weight (λ ≈ 5.0, closer to the paper)
+
 ### 2.2 Experimental Setup
 
 - **Dataset**: MS-COCO 2017 train subset (image–caption pairs)  
@@ -47,7 +52,7 @@ We keep the paper’s *Unified Multi-Modal Model* idea, while adapting it to our
 - Optimizer: AdamW (LR = 1e-4)  
 - Batch size: 4  
 - Total steps: 5,000  
-  → roughly 20,000 samples seen during training
+  - ≈ 20,000 image–caption pairs seen during training
 
 ---
 
@@ -62,51 +67,60 @@ but the training script is modified for **MS-COCO data loading** and **stable tr
 ### File Structure
 
 ```text
-├── train_coco_subset.py          # main training script
-├── eval_coco_val.py              # evaluation script (train/val loss)
-├── inference.py                  # text-to-image generation & debugging
-├── transfusion_pytorch/          # Transfusion core implementation
-└── results_coco_single/          # training logs & checkpoints
+transfusion-repro/
+├── main.py              # Training script (higher image loss weight, λ ≈ 5)
+├── sub_1.py             # Training script (baseline loss weight, λ ≈ 1)
+├── inference.py         # Text-to-image generation & debugging
+├── eval_coco_val.py     # Evaluation script (COCO train/val loss)
+├── transfusion_pytorch/ # Core Transfusion implementation (from lucidrains)
+├── results/             # Training logs, checkpoints, sample images
+└── resume_log.txt       
 ```
 
 ## 4. How to Run 
 
-1) Environment Setup
+###4.1 Environment Setup
 ```
 pip install torch torchvision transformers diffusers accelerate vector-quantize-pytorch
 ```
-2) Training
+### 4.2 Training – Baseline (λ ≈ 1, sub_1.py)
 ```
-python train_coco_subset.py \
+python sub_1.py \
   --coco-root ./data/coco \
   --coco-ann annotations/captions_train2017.json \
   --image-size 256 \
   --batch-size 4 \
   --max-steps 5000 \
-  --results-dir ./results_coco_single
+  --results-dir ./results/lambda1
 ```
-3) Inference / Testing
+This run corresponds to a lower image-loss weight (λ around 1.0), which is the configuration used for the main quantitative results reported below.
+
+### 4.3 Training – Image-focused (λ ≈ 5, main.py)
+```
+python main.py \
+  --coco-root ./data/coco \
+  --coco-ann annotations/captions_train2017.json \
+  --image-size 256 \
+  --batch-size 4 \
+  --max-steps 5000 \
+  --results-dir ./results/lambda5
+```
+This run uses a larger image loss weight (λ ≈ 5.0), closer to the setting described in the original paper.
+It is used to qualitatively compare how strongly emphasizing the diffusion loss affects convergence and generation behaviour.
+
+### 4.4 Inference / Testing
+inference.py loads a trained checkpoint, runs text-to-image generation for a small list of prompts, and saves any image tensors it finds.
+Inside inference.py, set:
+- MODEL_PATH to the checkpoint you want to use (e.g. ./results/lambda1/model_step_20000.pt)
+- SAVE_DIR to an output folder (e.g. ./results/lambda1_samples)
+Then run:
 ```
 python inference.py
 ```
+The script prints detailed information about the returned objects from ```model.sample(...)``` and saves any image-shaped tensors as PNG files
+
 ## 5. Experimental Results
-### 5.1 Quantitative Analysis
 
-During 5,000 training steps, the total loss decreased from 1.01 to 0.37 in a stable manner.
-This suggests that two very different modalities (text and images) can be jointly optimized in a single Transformer
-without the objectives collapsing into each other, supporting the core idea of Transfusion.
-
-### 5.2 Qualitative Analysis
-
-For qualitative evaluation, we attempted text-to-image generation.
-However, after receiving a text prompt, the model:
--correctly produced the special ```<BOI>``` token, but
--failed to transition into the image generation phase (diffusion latent sampling), and
--kept generating only text tokens.
-
-This behavior corresponds to a mode collapse in modality space:
-despite the numerically converged joint loss, the model behaves like a pure language model
-and does not utilize the image branch at inference time.
 
 
 ## 6. References
