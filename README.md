@@ -73,8 +73,7 @@ transfusion-repro/
 ├── inference.py         # Text-to-image generation & debugging
 ├── eval_coco_val.py     # Evaluation script (COCO train/val loss)
 ├── transfusion_pytorch/ # Core Transfusion implementation (from lucidrains)
-├── results/             # Training logs, checkpoints, sample images
-└── resume_log.txt       
+└── results/             # Training logs, checkpoints, sample images
 ```
 
 ## 4. How to Run 
