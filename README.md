@@ -73,8 +73,12 @@ transfusion-repro/
 ├── inference.py         # Text-to-image generation & debugging
 ├── eval_coco_val.py     # Evaluation script (COCO train/val loss)
 ├── transfusion_pytorch/ # Core Transfusion implementation (from lucidrains)
-└── results/             # Training logs, checkpoints, sample images
+└── results/                 # Experimental result artifacts (excluding checkpoints)
+    ├─ result_sub_1/         # Training loss curve with λ = 1 (loss_curve.png)
+    └─ result_main/          # Training loss curve with λ = 5 (loss_curve.png)
 ```
+> All training loss curves are limited to 5000 steps.
+> Note: Model checkpoints (.pt) are not included on GitHub due to size limitations.
 
 ## 4. How to Run 
 
