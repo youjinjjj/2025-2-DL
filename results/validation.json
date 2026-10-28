@@ -1,0 +1,8 @@
+{
+  "validated_on": "2026-10-28",
+  "python": "3.13.2",
+  "joint_loss_backward": true,
+  "coco_loader_and_decoder_offline_fixture": true,
+  "resume_matches_uninterrupted": true,
+  "full_coco_training": false
+}

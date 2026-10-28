@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.env
+.env.*
+data/*
+!data/README.md
+outputs/
+*.pt
+*.pth
+*.npy
+*.pkl
+*.zip

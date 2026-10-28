@@ -1,0 +1,13 @@
+{
+  "coco_fixture_samples": 2,
+  "text_loss": 4.903575897216797,
+  "flow_loss": 3.1109752655029297,
+  "loss_weight_1": 3.844970226287842,
+  "loss_weight_5": 4.520049571990967,
+  "decoded_image_shape": [
+    3,
+    16,
+    16
+  ],
+  "offline_pretrained_stubs": true
+}

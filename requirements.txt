@@ -1,0 +1,17 @@
+numpy==2.2.6
+torch==2.7.0
+torchvision==0.22.0
+transformers==4.57.1
+diffusers==0.35.2
+pycocotools==2.0.11
+matplotlib==3.10.3
+einx==0.4.3
+einops==0.8.2
+ema-pytorch==0.8.3
+axial-positional-embedding==0.3.12
+rotary-embedding-torch==0.9.1
+hyper-connections==0.4.11
+torchdiffeq==0.2.5
+loguru==0.7.3
+jaxtyping==0.3.11
+beartype==0.23.1

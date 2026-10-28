@@ -29,3 +29,4 @@ Traceback (most recent call last):
   File "/opt/conda/lib/python3.10/site-packages/accelerate/commands/launch.py", line 869, in simple_launcher
     raise subprocess.CalledProcessError(returncode=process.returncode, cmd=cmd)
 subprocess.CalledProcessError: Command '['/opt/conda/bin/python', 'train_coco_subset.py', '--coco-root', './data/coco', '--coco-ann', 'annotations/captions_train2017.json', '--image-size', '256', '--batch-size', '4', '--max-steps', '20000', '--results-dir', './results_coco_single']' returned non-zero exit status 1.
+

@@ -1,106 +1,54 @@
 import argparse
+from pathlib import Path
+
 import torch
-from transformers import AutoTokenizer
-from diffusers.models import AutoencoderKL
-from torch import nn
-from transfusion_pytorch import Transfusion
 from torchvision.utils import save_image
-import os
+
+from common import build_model, load_checkpoint, save_json, seed_everything
 
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--ckpt", type=str, required=True, help="Path to model checkpoint (.pt)")
-    return parser.parse_args()
+def image_tensors(sample):
+    for item in sample:
+        if isinstance(item, tuple) and len(item) == 2:
+            _, image = item
+            if isinstance(image, torch.Tensor) and image.ndim in (3, 4):
+                yield image
 
 
-class Encoder(nn.Module):
-    def __init__(self, vae):
-        super().__init__()
-        self.vae = vae
-    def forward(self, image):
-        with torch.no_grad():
-            latent = self.vae.encode(image * 2 - 1).latent_dist.sample()
-        return 0.18215 * latent
-
-class Decoder(nn.Module):
-    def __init__(self, vae):
-        super().__init__()
-        self.vae = vae
-    def forward(self, latents):
-        latents = (1 / 0.18215) * latents
-        with torch.no_grad():
-            image = self.vae.decode(latents).sample
-        return (image / 2 + 0.5).clamp(0, 1)
-
-def main():
-    args = parse_args()
-    
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
-
-    print("Initializing model...")
-    tokenizer = AutoTokenizer.from_pretrained("TinyLlama/TinyLlama-1.1B-Chat-v1.0")
-    vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").to(device)
-    
-    encoder = Encoder(vae)
-    decoder = Decoder(vae)
-
-    model = Transfusion(
-        num_text_tokens = tokenizer.vocab_size,
-        dim_latent = 4,
-        channel_first_latent = True,
-        modality_default_shape = (32, 32),
-        modality_encoder = encoder,
-        modality_decoder = decoder,
-        pre_post_transformer_enc_dec = (
-            nn.Conv2d(4, 768, 3, 2, 1),
-            nn.ConvTranspose2d(768, 4, 3, 2, 1, output_padding=1),
-        ),
-        add_pos_emb = False,
-        modality_num_dim = 2,
-        fallback_to_default_shape_if_invalid = True,
-        transformer = dict(dim=768, depth=12, dim_head=64, heads=12)
-    ).to(device)
-
-
-    if not os.path.exists(args.ckpt):
-        print(f"Error: Checkpoint not found at {args.ckpt}")
-        return
-
-    print(f"Loading weights from {args.ckpt} ...")
-    state_dict = torch.load(args.ckpt, map_location=device)
-    model.load_state_dict(state_dict)
+def generate(args):
+    device = torch.device(args.device)
+    checkpoint = load_checkpoint(args.ckpt, device)
+    if checkpoint["config"]["smoke_test"]:
+        raise ValueError("A synthetic smoke-test checkpoint has no image decoder")
+    model, tokenizer = build_model(checkpoint["config"], device)
+    model.load_state_dict(checkpoint["model"])
     model.eval()
-
-    prompt = "A cute cat"
-    print(f"Original Prompt: '{prompt}'")
-    
-
-    text_ids = tokenizer(prompt, return_tensors='pt')['input_ids'].to(device)
-
-
-    boi_id = model.som_ids[0] 
-    boi_tensor = torch.tensor([[boi_id]], device=device)
-
-
-    forced_input = torch.cat([text_ids, boi_tensor], dim=1)
-
-    print(f"Force prompting with <BOI> token injection...")
-
+    seed_everything(args.seed)
+    prompt = torch.tensor(tokenizer.encode(args.prompt, add_special_tokens=False), dtype=torch.long, device=device)
+    if args.force_image:
+        prompt = torch.cat([prompt, torch.tensor([model.som_ids[0]], device=device)])
     with torch.no_grad():
-        output = model.sample(prompt=forced_input, max_length=1200)
+        output = model.sample(prompt=prompt, max_length=args.max_length, modality_steps=args.modality_steps)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    count = 0
+    for count, image in enumerate(image_tensors(output), start=1):
+        save_image(image.detach().cpu(), args.output_dir / f"sample_{count}.png")
+    text = [item[item < len(tokenizer)].cpu().tolist() for item in output
+            if isinstance(item, torch.Tensor) and item.dtype == torch.long]
+    save_json(args.output_dir / "generation.json", {"prompt": args.prompt, "seed": args.seed,
+              "forced_image_start": args.force_image, "images_saved": count,
+              "text": [tokenizer.decode(ids) for ids in text]})
+    print(f"Images saved: {count}")
 
-    cnt = 0
-    for item in output:
-        if isinstance(item, torch.Tensor) and item.ndim == 4:
-            save_name = f"success_force_{cnt}.png"
-            save_image(item, save_name)
-            print(f"★ SUCCESS: Image Generated! Saved to {save_name}")
-            cnt += 1
-
-    if cnt == 0:
-        print("Result: No image generated. (Model might need more training steps)")
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ckpt", type=Path, required=True)
+    parser.add_argument("--prompt", default="A cat sitting on a chair")
+    parser.add_argument("--output-dir", type=Path, default=Path("results/samples"))
+    parser.add_argument("--max-length", type=int, default=1200)
+    parser.add_argument("--modality-steps", type=int, default=16)
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--force-image", action="store_true")
+    generate(parser.parse_args())
