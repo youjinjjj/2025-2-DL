@@ -1,6 +1,6 @@
 # Transfusion Reproduction
 
-텍스트의 next-token loss와 이미지의 flow loss를 한 Transformer에서 학습하는 Transfusion 논문 재현 프로젝트입니다.
+Transfusion 논문의 텍스트·이미지 결합 구조를 커뮤니티 구현으로 축소 재현하는 프로젝트입니다.
 COCO 이미지·캡션과 Stable Diffusion VAE를 연결했습니다. TinyLlama에서는 tokenizer만 사용하며, 언어모델 가중치를 불러오지는 않습니다.
 핵심 모델은 [lucidrains/transfusion-pytorch](https://github.com/lucidrains/transfusion-pytorch)의 구현입니다.
 
@@ -50,3 +50,14 @@ python transfusion-repro/inference.py --ckpt results/lambda1/model_step_10000.pt
 이 그림은 작은 합성 입력 검사 결과입니다. COCO의 생성 품질이나 논문 재현 성능을 뜻하지 않습니다.
 수정 후 COCO 전체 재학습은 하지 않았으므로 이전 README의 손실 감소·이미지 생성 실패를 현재 코드의 검증 결과로 제시하지 않습니다.
 원 실험 로그는 [이전 기록](results/historical/README.md)에 남겼습니다.
+
+## 논문과 구현 범위
+
+원 논문은 cosine noise schedule의 DDPM noise-prediction loss를 사용합니다. 참고한 Lucidrains 구현은 diffusion을 flow matching으로 대체하므로, 이 저장소의 flow loss가 원 논문의 DDPM loss와 동일한 것은 아닙니다.
+COCO 전체 학습은 이 커뮤니티 구현에서 λ=1과 λ=5를 비교하는 실험이며, 논문의 모델 규모·학습 corpus·정량 성능 전체를 재현하는 실험은 아닙니다.
+
+## References
+
+[1] Zhou et al., "Transfusion: Predict the Next Token and Diffuse Images with One Multi-Modal Model", ICLR 2025. [Paper](https://arxiv.org/abs/2408.11039)
+
+[2] Lucidrains, Transfusion-pytorch Repository. [Code](https://github.com/lucidrains/transfusion-pytorch)
