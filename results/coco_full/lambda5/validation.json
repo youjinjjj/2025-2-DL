@@ -1,0 +1,10 @@
+{
+  "split": "val",
+  "samples": 5000,
+  "seed": 42,
+  "checkpoint_step": 29572,
+  "flow_loss_weight": 5.0,
+  "total": 4.186592469215393,
+  "text": 1.7782472189426421,
+  "flow": 0.8840779348850251
+}

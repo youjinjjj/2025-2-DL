@@ -1,9 +1,17 @@
 {
   "python": "3.13.2",
+  "torch": "2.7.0+cu118",
+  "cuda": "11.8",
+  "cudnn": 90100,
+  "gpu": "NVIDIA GeForce GTX 1080 Ti",
+  "model_revisions": {
+    "tokenizer": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "vae": "31f26fdeee1355a5c34592e401dd41e45d25a493"
+  },
   "packages": {
     "numpy": "2.2.6",
-    "torch": "2.7.0",
-    "torchvision": "0.22.0",
+    "torch": "2.7.0+cu118",
+    "torchvision": "0.22.0+cu118",
     "transformers": "4.57.1",
     "diffusers": "0.35.2",
     "pycocotools": "2.0.11",

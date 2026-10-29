@@ -1,0 +1,18 @@
+{
+  "tokenizer": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "vae": "stabilityai/sd-vae-ft-mse",
+  "image_size": 256,
+  "dim": 768,
+  "depth": 12,
+  "heads": 12,
+  "flow_loss_weight": 5.0,
+  "text_loss_weight": 1.0,
+  "max_text_length": 128,
+  "seed": 42,
+  "smoke_test": false,
+  "batch_size": 4,
+  "lr": 0.0001,
+  "limit": null,
+  "model_output_clean": false,
+  "dataset_size": 118287
+}

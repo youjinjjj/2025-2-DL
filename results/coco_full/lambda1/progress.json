@@ -1,0 +1,11 @@
+{
+  "state": "completed",
+  "step": 29572,
+  "target_steps": 29572,
+  "dataset_size": 118287,
+  "images_seen": 118287,
+  "elapsed_seconds": 29562.913748099934,
+  "seconds_per_step": 0.9996927413803576,
+  "estimated_seconds_remaining": 0.0,
+  "flow_loss_weight": 1.0
+}

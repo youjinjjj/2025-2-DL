@@ -1,0 +1,156 @@
+[
+  {
+    "lambda": 1,
+    "validation": {
+      "split": "val",
+      "samples": 5000,
+      "seed": 42,
+      "checkpoint_step": 29572,
+      "flow_loss_weight": 1.0,
+      "total": 0.9465253136634827,
+      "text": 1.7440392042636872,
+      "flow": 0.8865145135402679
+    },
+    "free_images": 3,
+    "forced_images": 3,
+    "samples": [
+      {
+        "prompt": "A cat sitting on a chair",
+        "seed": 42,
+        "forced_image_start": true,
+        "images_saved": 1,
+        "text": [
+          "A cat sitting on a chair",
+          ""
+        ]
+      },
+      {
+        "prompt": "A cat sitting on a chair",
+        "seed": 42,
+        "forced_image_start": false,
+        "images_saved": 1,
+        "text": [
+          "A cat sitting on a chair in the middle of a living room.",
+          ""
+        ]
+      },
+      {
+        "prompt": "A red bus on a city street",
+        "seed": 43,
+        "forced_image_start": true,
+        "images_saved": 1,
+        "text": [
+          "A red bus on a city street",
+          ""
+        ]
+      },
+      {
+        "prompt": "A red bus on a city street",
+        "seed": 43,
+        "forced_image_start": false,
+        "images_saved": 1,
+        "text": [
+          "A red bus on a city street with trees and a person is sitting at a motorcycle.",
+          ""
+        ]
+      },
+      {
+        "prompt": "A bowl of fruit on a table",
+        "seed": 44,
+        "forced_image_start": true,
+        "images_saved": 1,
+        "text": [
+          "A bowl of fruit on a table",
+          ""
+        ]
+      },
+      {
+        "prompt": "A bowl of fruit on a table",
+        "seed": 44,
+        "forced_image_start": false,
+        "images_saved": 1,
+        "text": [
+          "A bowl of fruit on a table with chocolate icing on it.",
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "lambda": 5,
+    "validation": {
+      "split": "val",
+      "samples": 5000,
+      "seed": 42,
+      "checkpoint_step": 29572,
+      "flow_loss_weight": 5.0,
+      "total": 4.186592469215393,
+      "text": 1.7782472189426421,
+      "flow": 0.8840779348850251
+    },
+    "free_images": 3,
+    "forced_images": 3,
+    "samples": [
+      {
+        "prompt": "A cat sitting on a chair",
+        "seed": 42,
+        "forced_image_start": true,
+        "images_saved": 1,
+        "text": [
+          "A cat sitting on a chair",
+          ""
+        ]
+      },
+      {
+        "prompt": "A cat sitting on a chair",
+        "seed": 42,
+        "forced_image_start": false,
+        "images_saved": 1,
+        "text": [
+          "A cat sitting on a chair. on a table.",
+          ""
+        ]
+      },
+      {
+        "prompt": "A red bus on a city street",
+        "seed": 43,
+        "forced_image_start": true,
+        "images_saved": 1,
+        "text": [
+          "A red bus on a city street",
+          ""
+        ]
+      },
+      {
+        "prompt": "A red bus on a city street",
+        "seed": 43,
+        "forced_image_start": false,
+        "images_saved": 1,
+        "text": [
+          "A red bus on a city street with trees and a person is sitting at a barn.",
+          ""
+        ]
+      },
+      {
+        "prompt": "A bowl of fruit on a table",
+        "seed": 44,
+        "forced_image_start": true,
+        "images_saved": 1,
+        "text": [
+          "A bowl of fruit on a table",
+          ""
+        ]
+      },
+      {
+        "prompt": "A bowl of fruit on a table",
+        "seed": 44,
+        "forced_image_start": false,
+        "images_saved": 1,
+        "text": [
+          "A bowl of fruit on a table with a bowl of salad and vegetable peppers.",
+          ""
+        ]
+      }
+    ]
+  }
+]

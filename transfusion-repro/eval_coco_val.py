@@ -15,6 +15,8 @@ def evaluate(args):
         raise ValueError("A synthetic smoke-test checkpoint cannot be evaluated on COCO")
     model, tokenizer = build_model(config, device)
     model.load_state_dict(checkpoint["model"])
+    checkpoint_step = checkpoint["step"]
+    checkpoint = None
     model.eval()
     dataset = CocoTextImageDataset(args.coco_root, args.split, tokenizer, config["image_size"],
                                   config["max_text_length"], args.limit)
@@ -29,7 +31,7 @@ def evaluate(args):
             for name in total:
                 total[name] += values[name] * len(batch)
     result = {"split": args.split, "samples": len(dataset), "seed": args.seed,
-              "checkpoint_step": checkpoint["step"], "flow_loss_weight": config["flow_loss_weight"],
+              "checkpoint_step": checkpoint_step, "flow_loss_weight": config["flow_loss_weight"],
               **{name: value / len(dataset) for name, value in total.items()}}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     save_json(args.output, result)

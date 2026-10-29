@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "archive": "annotations_trainval2017.zip",
+      "bytes": 252907541,
+      "etag": "\"f4bbac642086de4f52a3fdda2de5fa2c\"",
+      "url": "https://s3.amazonaws.com/images.cocodataset.org/annotations/annotations_trainval2017.zip"
+    },
+    {
+      "archive": "val2017.zip",
+      "bytes": 815585330,
+      "etag": "\"d366be60d3dc737327160d62453e3973-98\"",
+      "url": "https://s3.amazonaws.com/images.cocodataset.org/zips/val2017.zip"
+    },
+    {
+      "archive": "train2017.zip",
+      "bytes": 19336861798,
+      "etag": "\"62ff7d7fbcc7e0c0604cbb0f9047ce77-2306\"",
+      "url": "https://s3.amazonaws.com/images.cocodataset.org/zips/train2017.zip"
+    }
+  ],
+  "train_images": 118287,
+  "val_images": 5000,
+  "annotation_sha256": {
+    "captions_train2017.json": "4b62086319480e0739ef390d04084515defb9c213ff13605a036061e33314317",
+    "captions_val2017.json": "afe3b30e403dd7f228e2373023abbd60042a6e10ec6874d3652df034d289ebb9"
+  }
+}

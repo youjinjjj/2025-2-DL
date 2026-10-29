@@ -88,6 +88,7 @@ def build_model(config, device):
     dim = config["dim"]
     model = Transfusion(
         num_text_tokens=len(tokenizer), dim_latent=4, channel_first_latent=True,
+        model_output_clean=config.get("model_output_clean", True),
         modality_default_shape=(config["image_size"] // 8,) * 2, modality_num_dim=2,
         modality_encoder=Encoder(vae), modality_decoder=Decoder(vae),
         pre_post_transformer_enc_dec=(nn.Conv2d(4, dim, 3, 2, 1),

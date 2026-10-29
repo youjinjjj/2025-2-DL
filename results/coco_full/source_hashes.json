@@ -1,0 +1,6 @@
+{
+  "transfusion-repro/main.py": "9679641b7d929e24283a1975bb1047720e01c70ebfaa83f30101194f94839dbc",
+  "transfusion-repro/common.py": "7a6f64b1f8738224fbc47e02c8d93471e675ca7c0d76f7326142b59ebdabe669",
+  "transfusion-repro/eval_coco_val.py": "9f685b44c5d95bd68efff19b3b945e5e22c5e538fd126d39296878b365100c16",
+  "transfusion-repro/inference.py": "5b1312bf366c2b0cf7d6048be1960f9a4f694defda99d2e57968268073bfa02d"
+}

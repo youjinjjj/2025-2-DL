@@ -22,6 +22,7 @@ def generate(args):
         raise ValueError("A synthetic smoke-test checkpoint has no image decoder")
     model, tokenizer = build_model(checkpoint["config"], device)
     model.load_state_dict(checkpoint["model"])
+    checkpoint = None
     model.eval()
     seed_everything(args.seed)
     prompt = torch.tensor(tokenizer.encode(args.prompt, add_special_tokens=False), dtype=torch.long, device=device)

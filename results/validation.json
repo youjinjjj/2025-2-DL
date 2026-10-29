@@ -1,8 +1,17 @@
 {
-  "validated_on": "2026-10-28",
-  "python": "3.13.2",
-  "joint_loss_backward": true,
-  "coco_loader_and_decoder_offline_fixture": true,
-  "resume_matches_uninterrupted": true,
-  "full_coco_training": false
+  "validated_on": "2026-10-29",
+  "full_coco_training": true,
+  "lambdas": [
+    1,
+    5
+  ],
+  "epochs_per_run": 1,
+  "train_images_per_run": 118287,
+  "steps_per_run": 29572,
+  "validation_images_per_run": 5000,
+  "ordinary_generated_images_per_run": 3,
+  "forced_generated_images_per_run": 3,
+  "losses_finite": true,
+  "original_paper_ddpm_reproduction": false,
+  "community_flow_matching": true
 }

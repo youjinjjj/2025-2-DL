@@ -1,0 +1,14 @@
+[
+  {
+    "lambda": 1,
+    "filename": "model_step_29572.pt",
+    "bytes": 4104368141,
+    "sha256": "ca36a02bb9dfc00524133fa51e036caf233928cf3306fa0a6e06155fc77b906b"
+  },
+  {
+    "lambda": 5,
+    "filename": "model_step_29572.pt",
+    "bytes": 4104368141,
+    "sha256": "d2f05bcde27ab58ef0e35b52918e7ef47bdde7e4081758d8d42c657eaea5773d"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "lambda": 1,
+    "training_rows": 29572,
+    "uncompressed_sha256": "737859e90f533bfda8962eab469de226cacace471112c881c54122d6631019aa"
+  },
+  {
+    "lambda": 5,
+    "training_rows": 29572,
+    "uncompressed_sha256": "13e46596a8f53b79459be460a363eee4cf4eccad00e28eb24c10db9a5b8b2a54"
+  }
+]
